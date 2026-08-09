@@ -102,8 +102,9 @@ Mount options: `noatime,ssd,discard=async`
 mount -o noatime,ssd,discard=async,subvol=@ /dev/nvme0n1p2 /mnt
 
 # Create mount point directories
-mkdir -p /mnt/{home,root,srv,opt,efi}
+mkdir -p /mnt/{home,root,srv,efi}
 mkdir -p /mnt/var/{cache,tmp,log}
+mkdir -p /opt/game
 
 # Mount remaining subvolumes
 mount -o noatime,ssd,discard=async,subvol=@home /dev/nvme0n1p2 /mnt/home
@@ -112,7 +113,7 @@ mount -o noatime,ssd,discard=async,subvol=@srv /dev/nvme0n1p2 /mnt/srv
 mount -o noatime,ssd,discard=async,subvol=@cache /dev/nvme0n1p2 /mnt/var/cache
 mount -o noatime,ssd,discard=async,subvol=@tmp /dev/nvme0n1p2 /mnt/var/tmp
 mount -o noatime,ssd,discard=async,subvol=@log /dev/nvme0n1p2 /mnt/var/log
-mount -o noatime,ssd,discard=async,subvol=@game /dev/nvme0n1p2 /mnt/opt
+mount -o noatime,ssd,discard=async,subvol=@game /dev/nvme0n1p2 /mnt/opt/game
 
 # Mount EFI partition
 mount /dev/nvme0n1p1 /mnt/efi
