@@ -6,15 +6,15 @@ This guide provides step-by-step instructions for installing Arch Linux with a *
 
 ## Table of Contents
 
-1. [System Overview](#1-system-overview)
-2. [Pre-Installation Setup (Live ISO & SSH)](#2-pre-installation-setup-live-iso--ssh)
-3. [Disk Partitioning & BTRFS Subvolumes](#3-disk-partitioning--btrfs-subvolumes)
-4. [Base System Installation](#4-base-system-installation)
-5. [System Configuration (Chroot)](#5-system-configuration-chroot)
-6. [Consolidated System Package Installation](#6-consolidated-system-package-installation)
-7. [First Reboot & TTY Shell Login](#7-first-reboot--tty-shell-login)
-8. [Post-Reboot Setup (AUR Packages & Services)](#8-post-reboot-setup-aur-packages--services)
-9. [Dotfiles & Reference Configurations](#9-dotfiles--reference-configurations)
+1. [Pre-Installation Setup (Live ISO & SSH)](#1-pre-installation-setup-live-iso--ssh)
+2. [Disk Partitioning & BTRFS Subvolumes](#2-disk-partitioning--btrfs-subvolumes)
+3. [Base System Installation](#3-base-system-installation)
+4. [System Configuration (Chroot)](#4-system-configuration-chroot)
+5. [Consolidated System Package Installation](#5-consolidated-system-package-installation)
+6. [First Reboot & TTY Shell Login](#6-first-reboot--tty-shell-login)
+7. [Post-Reboot Setup (AUR Packages & Services)](#7-post-reboot-setup-aur-packages--services)
+8. [Dotfiles & Reference Configurations](#8-dotfiles--reference-configurations)
+9. [LAVD Scheduler](#9-lavd-scheduler)
 
 ---
 
