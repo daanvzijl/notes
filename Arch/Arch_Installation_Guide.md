@@ -1,6 +1,6 @@
 # Arch Linux Installation & Hyprland Setup Guide
 
-This guide provides step-by-step instructions for installing Arch Linux with a **BTRFS subvolume layout**, **Linux Zen Kernel**, **GRUB with Snapper snapshots**, and a modern **Hyprland (Wayland)** desktop environment based on your configuration files and installation scripts.
+This guide provides step-by-step instructions for installing Arch Linux with a **BTRFS subvolume layout**, **Linux Zen Kernel**, **GRUB with Snapper snapshots**, and the **Hyprland** desktop environment.
 
 ---
 
@@ -18,19 +18,7 @@ This guide provides step-by-step instructions for installing Arch Linux with a *
 
 ---
 
-## 1. System Overview
-
-This is an **Arch Linux** installation centered around:
-
-- **BTRFS Filesystem with Automated Snapshots**: Uses dedicated subvolumes (`@`, `@home`, `@root`, `@srv`, `@cache`, `@tmp`, `@log`, `@game`) paired with `snapper`, `snap-pac`, and `grub-btrfs` to automatically create bootable snapshots before/after package management directly accessible from the GRUB boot menu.
-- **Linux Zen Kernel**: Configured with `linux-zen` and `intel-ucode`.
-- **Hyprland (Wayland) Desktop Environment**: Dynamic Wayland compositor managed via Lua (`hyprland.lua`) and systemd session management (`uwsm`).
-- **TUI Display Manager**: `ly` running on TTY1 for minimal boot overhead and clean shell handoff.
-- **Modern Desktop Ecosystem**: Powered by Waybar, Hyprpaper, Hyprlock, Hypridle, Mako notifications, PipeWire audio, and Bluez/Blueman Bluetooth stack.
-
----
-
-## 2. Pre-Installation Setup (Live ISO & SSH)
+## 1. Pre-Installation Setup (Live ISO & SSH)
 
 Boot into the Arch Linux Live ISO and complete the initial setup:
 
@@ -52,11 +40,11 @@ timedatectl set-ntp true
 
 ---
 
-## 3. Disk Partitioning & BTRFS Subvolumes
+## 2. Disk Partitioning & BTRFS Subvolumes
 
 > **Note**: Replace `/dev/nvme0n1` with your actual drive path (e.g. `/dev/sda`).
 
-### 3.1 Create Partitions
+### 2.1 Create Partitions
 Using `cfdisk` or `fdisk`:
 - Partition 1: **EFI System Partition** (512 MB, type `EFI System`)
 - Partition 2: **Linux Filesystem** (Remaining space, type `Linux filesystem`)
@@ -66,7 +54,7 @@ fdisk /dev/nvme0n1
 ```
 *Partition Table layout: GPT (`g`), 1st partition `+512M` (type EFI), 2nd partition rest of disk (type Linux filesystem).*
 
-### 3.2 Format Partitions
+### 2.2 Format Partitions
 ```bash
 # Format EFI partition as FAT32
 mkfs.fat -F 32 /dev/nvme0n1p1
@@ -75,7 +63,7 @@ mkfs.fat -F 32 /dev/nvme0n1p1
 mkfs.btrfs /dev/nvme0n1p2
 ```
 
-### 3.3 Create BTRFS Subvolumes
+### 2.3 Create BTRFS Subvolumes
 ```bash
 # Mount root filesystem temporarily
 mount /dev/nvme0n1p2 /mnt
@@ -94,7 +82,7 @@ btrfs subvolume create /mnt/@game
 umount /mnt
 ```
 
-### 3.4 Mount Subvolumes & EFI
+### 2.4 Mount Subvolumes & EFI
 Mount options: `noatime,ssd,discard=async`
 
 ```bash
@@ -124,7 +112,7 @@ findmnt -R /mnt
 
 ---
 
-## 4. Base System Installation
+## 3. Base System Installation
 
 Install the essential base system packages using `pacstrap`:
 
@@ -151,14 +139,14 @@ cat /mnt/etc/fstab
 
 ---
 
-## 5. System Configuration (Chroot)
+## 4. System Configuration (Chroot)
 
 Chroot into the installed system:
 ```bash
 arch-chroot /mnt
 ```
 
-### 5.1 Locale & Keyboard
+### 4.1 Locale & Keyboard
 Edit `/etc/locale.gen` and uncomment both `en_US.UTF-8 UTF-8` (system language) and `en_GB.UTF-8 UTF-8` (for EU-styled 24-hour clocks and `DD/MM/YY` date formatting), then generate locales:
 
 ```bash
@@ -175,7 +163,7 @@ echo "LC_TIME=en_GB.UTF-8" >> /etc/locale.conf
 echo "KEYMAP=us" > /etc/vconsole.conf
 ```
 
-### 5.2 Hostname & Users
+### 4.2 Hostname & Users
 ```bash
 # Set hostname (replace t15 with your desired hostname)
 echo "t15" > /etc/hostname
@@ -192,7 +180,7 @@ EDITOR=vim visudo
 ```
 *In `visudo`, uncomment `%wheel ALL=(ALL:ALL) ALL`.*
 
-### 5.3 Optimize Mirrors
+### 4.3 Optimize Mirrors
 Install `reflector` and generate an updated mirrorlist. **Be sure to edit the command and replace `Netherlands` with your own country** (e.g., `"United States"`, `"Germany"`, etc.):
 
 ```bash
@@ -204,9 +192,9 @@ reflector -c Netherlands -a 12 --sort rate --save /etc/pacman.d/mirrorlist
 
 ---
 
-## 6. Consolidated System Package Installation
+## 5. Consolidated System Package Installation
 
-All official repository packages—including desktop components, audio drivers, hardware controllers, fonts, and utilities—are consolidated into this single installation step before first reboot:
+All system packages consolidated into this single installation step before first reboot:
 
 ```bash
 pacman -Syu \
@@ -270,7 +258,7 @@ pacman -Syu \
     firefox
 ```
 
-### 6.1 Bootloader Configuration & Enable System Services
+### 5.1 Bootloader Configuration & Enable System Services
 ```bash
 # Rebuild initramfs
 mkinitcpio -P
@@ -297,7 +285,7 @@ systemctl enable \
 
 ---
 
-## 7. First Reboot & TTY Shell Login
+## 6. First Reboot & TTY Shell Login
 
 Exit the chroot environment, unmount the filesystems, and reboot into your new system:
 
@@ -322,11 +310,11 @@ reboot
 
 ---
 
-## 8. Post-Reboot Setup (AUR Packages & Services)
+## 7. Post-Reboot Setup (AUR Packages & Services)
 
 Once logged into your user account shell (`daan`):
 
-### 8.1 Update System & Install Paru (AUR Helper)
+### 7.1 Update System & Install Paru (AUR Helper)
 ```bash
 sudo pacman -Syu
 
@@ -338,13 +326,13 @@ cd ..
 rm -rf paru
 ```
 
-### 8.2 Install AUR Packages (`wayfreeze` & `wleave`)
+### 7.2 Install AUR Packages (`wayfreeze` & `wleave`)
 ```bash
 # Install wayfreeze (screen freezing for grim/slurp screenshots) and wleave (Wayland logout menu)
 paru -S wayfreeze-git wleave
 ```
 
-### 8.3 Enable User Services
+### 7.3 Enable User Services
 ```bash
 systemctl --user enable --now \
     hyprpaper.service \
@@ -354,22 +342,22 @@ systemctl --user enable --now \
     hypridle.service
 ```
 
-### 8.4 Update Hyprland Plugins & Verification
+### 7.4 Update Hyprland Plugins & Verification
 ```bash
 # Update Hyprland plugin manager
 hyprpm update
 ```
 
-### 8.5 Snapper Configuration
+### 7.5 Snapper Configuration
 You may want to inspect your Snapper configuration (`/etc/snapper/configs/root`) to review snapshot retention settings according to your needs.
 
 ---
 
-## 9. Dotfiles & Reference Configurations
+## 8. Dotfiles & Reference Configurations
 
 > Reference Note: The configuration files located in the [`files/`](./files/) directory are my personal dotfiles and are provided purely for reference as examples of how I configure each application in this setup.
 
-### 9.1 Reference Files
+### 8.1 Reference Files
 - **Hyprland**: [`files/hypr/hyprland.lua`](./files/hypr/hyprland.lua)
 - **Hypridle**: [`files/hypr/hypridle.conf`](./files/hypr/hypridle.conf)
 - **Hyprlock**: [`files/hypr/hyprlock.conf`](./files/hypr/hyprlock.conf)
@@ -377,7 +365,7 @@ You may want to inspect your Snapper configuration (`/etc/snapper/configs/root`)
 - **Waybar**: [`files/waybar/config.jsonc`](./files/waybar/config.jsonc) & [`files/waybar/style.css`](./files/waybar/style.css)
 - **Mako**: [`files/mako/config`](./files/mako/config)
 
-### 9.2 Custom Keybindings & Input Adjustments
+### 8.2 Custom Keybindings & Input Adjustments
 
 Notable custom keybindings and input overrides in [`files/hypr/hyprland.lua`](./files/hypr/hyprland.lua):
 
@@ -386,5 +374,30 @@ Notable custom keybindings and input overrides in [`files/hypr/hyprland.lua`](./
 - **Caps Lock Modifier (`kb_options = "caps:ctrl_modifier"`)**: Remaps Caps Lock to behave as Ctrl.
 - **Flat Mouse Profile (`accel_profile = "flat"`)**: Disables mouse acceleration for flat, raw pointer input.
 
-### 9.3 Starting the Desktop Environment
+### 8.3 Starting the Desktop Environment
 Once your system configuration is complete, log in using the `ly` display manager interface on TTY1 and select the **UWSM-managed Hyprland** session to start your desktop environment.
+
+
+## 9. LAVD Scheduler
+
+This step is optional, but I personally like to enable/load the LAVD scheduler. This can be done with eBPF.
+
+First install:
+```bash
+sudo pacman -Syu scx-scheds scx-tools
+```
+
+Then create/edit the following file: `/etc/scx_loader/config.toml`
+
+```bash
+default_sched = "scx_lavd"
+default_mode = "Auto"
+
+[scheds.scx_lavd]
+auto_mode = ["--performance"]
+```
+Enable the scx_loader service:
+
+```bash
+sudo systemctl enable --now scx_loader
+```
