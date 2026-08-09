@@ -1,0 +1,120 @@
+// -*- mode: jsonc -*-
+{
+    "height": 30,
+    "spacing": 4,
+
+    "modules-left": [
+        "hyprland/workspaces"
+    ],
+
+    "modules-center": [
+        "clock"
+    ],
+
+    "modules-right": [
+        "network",
+        "pulseaudio",
+        "backlight",
+        "battery",
+        "power-profiles-daemon",
+        "idle_inhibitor",
+        "tray",
+        "custom/power"
+    ],
+
+    "hyprland/workspaces": {
+        "disable-scroll": true,
+        "on-click": "activate",
+        "format": "{id}"
+    },
+
+    "network": {
+        "format-wifi": "",
+        "format-ethernet": "󰈀",
+        "format-disconnected": "󰖪",
+        "tooltip-format": "{ifname}\n{ipaddr}/{cidr}\n{essid}",
+        "on-click": "nm-connection-editor"
+    },
+
+    "pulseaudio": {
+        "format": "{volume}% {icon}",
+        "format-muted": "󰝟",
+        "format-icons": {
+            "default": [
+                "󰕿",
+                "󰖀",
+                "󰕾"
+            ]
+        },
+        "scroll-step": 5,
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "tooltip-format": "{desc}\nVolume: {volume}%"
+    },
+
+    "backlight": {
+        "format": "{percent}% {icon}",
+        "format-icons": [
+            "󰃞",
+            "󰃟",
+            "󰃠"
+        ],
+        "scroll-step": 5,
+        "tooltip-format": "Brightness: {percent}%"
+    },
+
+    "battery": {
+        "format": "{capacity}% {icon}",
+        "format-charging": "{capacity}% 󰂄",
+        "format-plugged": "{capacity}% 󰂄",
+        "format-icons": [
+            "󰁺",
+            "󰁻",
+            "󰁼",
+            "󰁽",
+            "󰁾",
+            "󰁿",
+            "󰂀",
+            "󰂁",
+            "󰂂",
+            "󰁹"
+        ],
+        "tooltip-format": "{capacity}%\n{timeTo}"
+    },
+
+    "power-profiles-daemon": {
+        "format": "{icon}",
+        "format-icons": {
+            "default": "",
+            "performance": "",
+            "balanced": "",
+            "power-saver": ""
+        },
+        "tooltip-format": "Power profile: {profile}"
+    },
+
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "󰛐",
+            "deactivated": "󰾪"
+        },
+        "tooltip-format-activated": "Idle inhibitor: ON",
+        "tooltip-format-deactivated": "Idle inhibitor: OFF"
+    },
+
+    "tray": {
+        "spacing": 10
+    },
+
+    "clock": {
+        "timezone": "Europe/Amsterdam",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%Y-%m-%d}"
+    },
+
+    "custom/power": {
+        "format": "⏻ ",
+        "tooltip": false,
+        "on-click": "hyprctl dispatch 'hl.dsp.exec_cmd(\"wleave\")'"
+    }
+}
