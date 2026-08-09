@@ -194,7 +194,7 @@ reflector -c Netherlands -a 12 --sort rate --save /etc/pacman.d/mirrorlist
 
 ## 5. Consolidated System Package Installation
 
-All official repository packages—including desktop components, audio drivers, hardware controllers, fonts, and utilities—are consolidated into this single installation step before first reboot:
+All system packages consolidated into this single installation step before first reboot:
 
 ```bash
 pacman -Syu \
