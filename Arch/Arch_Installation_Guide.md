@@ -116,7 +116,7 @@ findmnt -R /mnt
 ## 3. Base System Installation
 
 Install the essential base system packages using `pacstrap`:
-Remember to swap `intel-ucode` for `amd-ucode` wif on an AMD CPU.
+Remember to swap `intel-ucode` for `amd-ucode` if on an AMD CPU.
 
 ```bash
 pacstrap -K /mnt \
