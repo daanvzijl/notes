@@ -14,7 +14,8 @@ This guide provides step-by-step instructions for installing Arch Linux with a *
 6. [First Reboot & TTY Shell Login](#6-first-reboot--tty-shell-login)
 7. [Post-Reboot Setup (AUR Packages & Services)](#7-post-reboot-setup-aur-packages--services)
 8. [Dotfiles & Reference Configurations](#8-dotfiles--reference-configurations)
-9. [LAVD Scheduler](#9-lavd-scheduler)
+9. [Optional: LAVD Scheduler](#9-optional-lavd-scheduler)
+10. [Optional: Gaming Tools](#10-optional-gaming-tools)
 
 ---
 
@@ -92,7 +93,7 @@ mount -o noatime,ssd,discard=async,subvol=@ /dev/nvme0n1p2 /mnt
 # Create mount point directories
 mkdir -p /mnt/{home,root,srv,efi}
 mkdir -p /mnt/var/{cache,tmp,log}
-mkdir -p /opt/game
+mkdir -p /mnt/opt/game
 
 # Mount remaining subvolumes
 mount -o noatime,ssd,discard=async,subvol=@home /dev/nvme0n1p2 /mnt/home
@@ -115,6 +116,7 @@ findmnt -R /mnt
 ## 3. Base System Installation
 
 Install the essential base system packages using `pacstrap`:
+Remember to swap `intel-ucode` for `amd-ucode` wif on an AMD CPU.
 
 ```bash
 pacstrap -K /mnt \
@@ -190,6 +192,15 @@ pacman -S reflector rsync
 reflector -c Netherlands -a 12 --sort rate --save /etc/pacman.d/mirrorlist
 ```
 
+Edit the default reflector config to your liking if you enable the timer job later in this guide (I do).
+`/etc/xdg/reflector/reflector.conf`
+
+I personally only set/change the following keys/values:
+```bash
+--country Netherlands
+--sort score
+```
+
 ---
 
 ## 5. Consolidated System Package Installation
@@ -210,7 +221,6 @@ pacman -Syu \
     inotify-tools \
     rtkit \
     snap-pac \
-    reflector \
     hyprland \
     uwsm \
     libnewt \
@@ -258,7 +268,35 @@ pacman -Syu \
     firefox
 ```
 
-### 5.1 Bootloader Configuration & Enable System Services
+### 5.1 Optional: GPU Drivers
+
+Install graphics drivers if needed:
+
+```bash
+# AMD (discrete or integrated)
+pacman -S mesa vulkan-radeon libva-mesa-driver
+
+# NVIDIA — Turing (RTX 20xx) and newer
+# Note: Hyprland has no official Nvidia support. Works for many, but expect more
+# friction than AMD/Intel (XWayland sync issues, occasional driver/kernel breakage).
+# See: https://wiki.hypr.land/Nvidia/
+pacman -S nvidia-open-dkms nvidia-utils vulkan-icd-loader
+
+# NVIDIA — GTX 900/1000 series (Maxwell/Pascal): use legacy driver from AUR instead, official repos no longer support these cards
+```
+
+Further configuration for NVIDIA:
+
+Enable DRM modesetting (required for Wayland/Hyprland on Nvidia)
+```bash
+echo "options nvidia_drm modeset=1" > /etc/modprobe.d/nvidia.conf
+```
+
+Add Nvidia modules to initramfs for early KMS — edit /etc/mkinitcpio.conf,
+add to the MODULES=() array: nvidia nvidia_modeset nvidia_uvm nvidia_drm
+
+
+### 5.2 Bootloader Configuration & Enable System Services
 ```bash
 # Rebuild initramfs
 mkinitcpio -P
@@ -278,8 +316,6 @@ systemctl enable \
     sshd.service \
     systemd-timesyncd.service \
     reflector.timer \
-    grub-btrfsd.service \
-    snapper-cleanup.timer \
     power-profiles-daemon.service
 ```
 
@@ -310,11 +346,26 @@ reboot
 
 ---
 
-## 7. Post-Reboot Setup (AUR Packages & Services)
+## 7. Post-Reboot Setup (AUR Packages, Services & Snapper)
 
 Once logged into your user account shell (`daan`):
 
-### 7.1 Update System & Install Paru (AUR Helper)
+### 7.1 Configure Snapper and enable relevant services.
+
+Create snapper root config with:
+
+```bash
+sudo snapper -c root create-config /
+```
+And enable relevant services:
+
+```bash
+sudo systemctl enable --now \
+    grub-btrfsd.service \
+    snapper-cleanup.timer
+```
+
+### 7.2 Update System & Install Paru (AUR Helper)
 ```bash
 sudo pacman -Syu
 
@@ -326,13 +377,13 @@ cd ..
 rm -rf paru
 ```
 
-### 7.2 Install AUR Packages (`wayfreeze` & `wleave`)
+### 7.3 Install AUR Packages (`wayfreeze` & `wleave`)
 ```bash
 # Install wayfreeze (screen freezing for grim/slurp screenshots) and wleave (Wayland logout menu)
 paru -S wayfreeze-git wleave
 ```
 
-### 7.3 Enable User Services
+### 7.4 Enable User Services
 ```bash
 systemctl --user enable --now \
     hyprpaper.service \
@@ -342,13 +393,13 @@ systemctl --user enable --now \
     hypridle.service
 ```
 
-### 7.4 Update Hyprland Plugins & Verification
+### 7.5 Update Hyprland Plugins & Verification
 ```bash
 # Update Hyprland plugin manager
 hyprpm update
 ```
 
-### 7.5 Snapper Configuration
+### 7.6 Snapper Configuration
 You may want to inspect your Snapper configuration (`/etc/snapper/configs/root`) to review snapshot retention settings according to your needs.
 
 ---
@@ -378,7 +429,7 @@ Notable custom keybindings and input overrides in [`files/hypr/hyprland.lua`](./
 Once your system configuration is complete, log in using the `ly` display manager interface on TTY1 and select the **UWSM-managed Hyprland** session to start your desktop environment.
 
 
-## 9. LAVD Scheduler
+## 9. Optional: LAVD Scheduler
 
 This step is optional, but I personally like to enable/load the LAVD scheduler. This can be done with eBPF.
 
@@ -389,7 +440,7 @@ sudo pacman -Syu scx-scheds scx-tools
 
 Then create/edit the following file: `/etc/scx_loader/config.toml`
 
-```bash
+```toml
 default_sched = "scx_lavd"
 default_mode = "Auto"
 
@@ -401,3 +452,20 @@ Enable the scx_loader service:
 ```bash
 sudo systemctl enable --now scx_loader
 ```
+
+## 10. Optional: Gaming Tools
+
+Requires the multilib repository enabled in `/etc/pacman.conf` (uncomment the `[multilib]` section and the `Include` line beneath it, then `sudo pacman -Syu`) — needed for `steam`, `lib32-gamemode`, and `lib32-mangohud`.
+
+```bash
+pacman -S steam gamemode lib32-gamemode mangohud lib32-mangohud
+```
+
+Add yourself to the gamemode group (required for gamemode to work):
+
+```bash
+sudo groupadd -f gamemode
+sudo usermod -aG gamemode daan
+```
+
+Reboot or re-login for the group change to take effect.
